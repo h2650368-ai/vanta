@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -20,18 +21,20 @@ button,input{font:inherit}
 button{cursor:pointer}
 .hidden{display:none!important}
 header{
-  padding:17px 20px;border-bottom:1px solid var(--border);
+  padding:16px 20px;border-bottom:1px solid var(--border);
   display:flex;align-items:center;justify-content:space-between;
-  position:sticky;top:0;background:#09090df2;
+  gap:12px;position:sticky;top:0;z-index:5;
+  background:#09090df2;backdrop-filter:blur(12px);
 }
 .logo{font-size:25px;font-weight:950;letter-spacing:4px}
 .logo span{color:var(--accent)}
-main{width:min(100% - 28px,470px);margin:38px auto}
+main{width:min(100% - 28px,600px);margin:28px auto;min-height:65vh}
 .card{
   background:var(--panel);border:1px solid var(--border);
-  border-radius:22px;padding:23px;
+  border-radius:22px;padding:22px;margin-bottom:16px;
 }
-h1{font-size:25px;margin:10px 0}
+h1{font-size:25px;margin:12px 0}
+h2{font-size:19px;margin:8px 0}
 p{color:var(--muted);line-height:1.8;font-size:14px}
 label{display:block;margin:15px 0 7px;font-size:13px}
 input{
@@ -42,9 +45,10 @@ input{
 input:focus{border-color:var(--accent)}
 .btn{
   width:100%;border:0;border-radius:12px;padding:13px;
-  margin-top:17px;background:var(--accent);
+  margin-top:16px;background:var(--accent);
   color:#171020;font-weight:800;
 }
+.btn:disabled{opacity:.6;cursor:wait}
 .switch{
   color:var(--accent);background:none;border:0;
   padding:5px;font-weight:700;
@@ -56,14 +60,22 @@ input:focus{border-color:var(--accent)}
 }
 .eyebrow{color:var(--accent);font-size:11px;letter-spacing:3px}
 .small{font-size:12px;color:var(--muted)}
-.profile{
-  display:flex;align-items:center;gap:13px;margin:20px 0;
-}
+.profile{display:flex;align-items:center;gap:13px;margin:20px 0}
 .avatar{
-  width:55px;height:55px;border-radius:50%;
+  width:55px;height:55px;flex-shrink:0;border-radius:50%;
   background:linear-gradient(135deg,#b9a0ff,#514078);
   color:#100d19;display:grid;place-items:center;
   font-size:22px;font-weight:900;
+}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.nav button{
+  border:1px solid var(--border);background:var(--panel);
+  color:var(--text);padding:10px 16px;border-radius:12px;
+}
+.nav button.active{background:var(--accent);color:#171020}
+.stat{
+  border:1px solid var(--border);background:#171620;
+  border-radius:15px;padding:15px;margin-top:12px;
 }
 hr{border:0;border-top:1px solid var(--border);margin:20px 0}
 footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
@@ -77,24 +89,23 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
 </header>
 
 <main>
+  <!-- تسجيل الحساب والدخول -->
   <section class="card" id="authScreen">
     <div class="eyebrow">WELCOME TO VANTA</div>
     <h1 id="formTitle">أنشئ حسابك الجديد</h1>
-    <p id="formDescription">
-      سجّل حسابك وابدأ بناء عالمك الخاص.
-    </p>
+    <p id="formDescription">سجّل حسابك وابدأ بناء عالمك الخاص.</p>
 
     <form id="authForm">
       <div id="registerFields">
         <label for="fullName">الاسم الكامل</label>
-        <input id="fullName" maxlength="60"
-          autocomplete="name" placeholder="اسمك الكامل" required>
+        <input id="fullName" maxlength="60" autocomplete="name"
+          placeholder="اسمك الكامل" required>
 
         <label for="username">اسم المستخدم</label>
         <input id="username" minlength="3" maxlength="24"
           autocomplete="username" placeholder="username"
           pattern="[A-Za-z0-9_]+" required>
-        <p class="small">استخدم حروفًا إنجليزية وأرقامًا وشرطة سفلية فقط.</p>
+        <p class="small">حروف إنجليزية وأرقام وشرطة سفلية فقط.</p>
       </div>
 
       <label for="email">البريد الإلكتروني</label>
@@ -108,12 +119,10 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
       <div id="confirmField">
         <label for="confirmPassword">تأكيد كلمة المرور</label>
         <input id="confirmPassword" type="password" minlength="8"
-          autocomplete="new-password" placeholder="اكتب كلمة المرور مرة أخرى" required>
+          autocomplete="new-password" placeholder="اكتبها مرة أخرى" required>
       </div>
 
-      <button class="btn" id="submitBtn" type="submit">
-        إنشاء الحساب
-      </button>
+      <button class="btn" id="submitBtn" type="submit">إنشاء الحساب</button>
     </form>
 
     <p id="switchText">
@@ -122,28 +131,55 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
     </p>
 
     <div id="authMessage" class="message hidden" role="status"></div>
-    <p class="small">
-      حسابات حقيقية عبر Supabase. لا تشارك كلمة مرورك مع أي شخص.
-    </p>
+    <p class="small">حسابك محمي بتسجيل الدخول عبر Supabase.</p>
   </section>
 
-  <section class="card hidden" id="accountScreen">
-    <div class="eyebrow">YOUR VANTA ACCOUNT</div>
-    <h1>أهلًا بيك في VANTA 🖤</h1>
+  <!-- الواجهة الرئيسية بعد تسجيل الدخول -->
+  <section id="appScreen" class="hidden">
+    <nav class="nav">
+      <button type="button" id="homeTab" class="active">الرئيسية</button>
+      <button type="button" id="profileTab">حسابي</button>
+    </nav>
 
-    <div class="profile">
-      <div class="avatar" id="avatar">V</div>
-      <div>
-        <strong id="displayName"></strong>
-        <p id="handle" style="margin:5px 0"></p>
+    <section id="homePanel" class="card">
+      <div class="eyebrow">YOUR WORLD. YOUR SPACE.</div>
+      <h1>أهلًا بيك في VANTA 🖤</h1>
+      <p>دي مساحتك الخاصة. حسابك اتصل بنجاح، ونقدر نكمل بناء المنصة من هنا.</p>
+
+      <div class="profile">
+        <div class="avatar" id="homeAvatar">V</div>
+        <div>
+          <strong id="homeName">مستخدم VANTA</strong>
+          <p id="homeHandle" style="margin:5px 0"></p>
+        </div>
       </div>
-    </div>
 
-    <hr>
-    <p id="accountEmail"></p>
-    <p>حسابك متصل بـ Supabase.</p>
-    <div id="accountMessage" class="message hidden" role="status"></div>
-    <button class="btn" id="logoutBtn" type="button">تسجيل الخروج</button>
+      <div class="stat">
+        <h2>مساحتك الخاصة</h2>
+        <p>تم تسجيل دخولك. الخطوة التالية هي ربط المنشورات وباقي خصائص المنصة بقاعدة البيانات.</p>
+      </div>
+
+      <div id="homeMessage" class="message hidden" role="status"></div>
+    </section>
+
+    <section id="profilePanel" class="card hidden">
+      <div class="eyebrow">YOUR ACCOUNT</div>
+      <h1>حسابي</h1>
+
+      <div class="profile">
+        <div class="avatar" id="profileAvatar">V</div>
+        <div>
+          <strong id="profileName">مستخدم VANTA</strong>
+          <p id="profileHandle" style="margin:5px 0"></p>
+        </div>
+      </div>
+
+      <hr>
+      <p>البريد الإلكتروني</p>
+      <strong id="accountEmail"></strong>
+      <div id="accountMessage" class="message hidden" role="status"></div>
+      <button class="btn" id="logoutBtn" type="button">تسجيل الخروج</button>
+    </section>
   </section>
 </main>
 
@@ -157,32 +193,38 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
 
   const $ = id => document.getElementById(id);
 
+  function showMessage(id, text) {
+    const el = $(id);
+    el.textContent = text;
+    el.classList.remove("hidden");
+  }
+
+  function hideMessage(id) {
+    $(id).textContent = "";
+    $(id).classList.add("hidden");
+  }
+
   if (!window.supabase) {
-    $("authMessage").textContent =
-      "تعذر تحميل مكتبة الاتصال. تأكد من الإنترنت ثم أعد فتح الصفحة.";
-    $("authMessage").classList.remove("hidden");
+    showMessage("authMessage",
+      "تعذر تحميل مكتبة الاتصال. تأكد من الإنترنت وأعد فتح الموقع.");
     $("submitBtn").disabled = true;
     return;
   }
 
   const db = window.supabase.createClient(
     SUPABASE_URL,
-    SUPABASE_KEY
+    SUPABASE_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
+    }
   );
 
   let mode = "signup";
   let busy = false;
-
-  function message(text, target = "authMessage") {
-    const el = $(target);
-    el.textContent = text;
-    el.classList.remove("hidden");
-  }
-
-  function clearMessage() {
-    $("authMessage").textContent = "";
-    $("authMessage").classList.add("hidden");
-  }
 
   function setMode(nextMode) {
     mode = nextMode;
@@ -190,17 +232,238 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
 
     $("registerFields").classList.toggle("hidden", !signup);
     $("confirmField").classList.toggle("hidden", !signup);
-
     $("fullName").required = signup;
     $("username").required = signup;
     $("confirmPassword").required = signup;
 
+    $("password").autocomplete = signup ? "new-password" : "current-password";
+
     $("formTitle").textContent =
       signup ? "أنشئ حسابك الجديد" : "أهلًا بعودتك";
+
     $("formDescription").textContent =
       signup ? "سجّل حسابك وابدأ بناء عالمك الخاص."
              : "سجّل الدخول للمتابعة إلى حسابك.";
+
     $("submitBtn").textContent =
       signup ? "إنشاء الحساب" : "تسجيل الدخول";
+
     $("switchText").childNodes[0].textContent =
-      signup ? "عندك حساب بالفعل؟ " : "لسه مع
+      signup ? "عندك حساب بالفعل؟ " : "لسه معندكش حساب؟ ";
+
+    $("switchMode").textContent =
+      signup ? "تسجيل الدخول" : "إنشاء حساب";
+
+    hideMessage("authMessage");
+  }
+
+  $("switchMode").addEventListener("click", () => {
+    setMode(mode === "signup" ? "login" : "signup");
+  });
+
+  function showAuth() {
+    $("appScreen").classList.add("hidden");
+    $("authScreen").classList.remove("hidden");
+    $("authForm").reset();
+    setMode("login");
+  }
+
+  async function ensureProfile(user) {
+    const meta = user.user_metadata || {};
+    const emailName = (user.email || "vanta_user").split("@")[0];
+    const username = String(meta.username || emailName)
+      .toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 24) || "vanta_user";
+
+    const profile = {
+      id: user.id,
+      username,
+      display_name: String(meta.display_name || emailName).slice(0, 60)
+    };
+
+    const { error } = await db
+      .from("profiles")
+      .upsert(profile, { onConflict: "id" });
+
+    if (error) {
+      console.error("Profile save error:", error);
+      return "تم تسجيل الدخول، لكن تعذر حفظ بيانات الملف الشخصي: " + error.message;
+    }
+
+    return "";
+  }
+
+  async function showApp(user) {
+    $("authScreen").classList.add("hidden");
+    $("appScreen").classList.remove("hidden");
+    $("homePanel").classList.remove("hidden");
+    $("profilePanel").classList.add("hidden");
+    $("homeTab").classList.add("active");
+    $("profileTab").classList.remove("active");
+
+    const meta = user.user_metadata || {};
+    const emailName = (user.email || "vanta_user").split("@")[0];
+    const name = String(meta.display_name || emailName);
+    const username = String(meta.username || emailName);
+
+    $("homeName").textContent = name;
+    $("profileName").textContent = name;
+    $("homeHandle").textContent = "@" + username;
+    $("profileHandle").textContent = "@" + username;
+    $("homeAvatar").textContent = name.trim().charAt(0).toUpperCase() || "V";
+    $("profileAvatar").textContent = name.trim().charAt(0).toUpperCase() || "V";
+    $("accountEmail").textContent = user.email || "";
+
+    hideMessage("homeMessage");
+    hideMessage("accountMessage");
+
+    const profileError = await ensureProfile(user);
+    if (profileError) {
+      showMessage("accountMessage", profileError);
+    }
+  }
+
+  $("authForm").addEventListener("submit", async event => {
+    event.preventDefault();
+    if (busy) return;
+
+    hideMessage("authMessage");
+
+    const email = $("email").value.trim();
+    const password = $("password").value;
+
+    if (!email || !password) {
+      showMessage("authMessage", "اكتب الإيميل وكلمة المرور.");
+      return;
+    }
+
+    if (mode === "signup") {
+      const fullName = $("fullName").value.trim();
+      const username = $("username").value.trim().toLowerCase();
+      const confirmPassword = $("confirmPassword").value;
+
+      if (!fullName) {
+        showMessage("authMessage", "اكتب اسمك الكامل.");
+        return;
+      }
+
+      if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+        showMessage("authMessage",
+          "اسم المستخدم لازم يكون من 3 إلى 24 حرفًا، باستخدام الإنجليزية والأرقام و _ فقط.");
+        return;
+      }
+
+      if (password.length < 8) {
+        showMessage("authMessage", "كلمة المرور لازم تكون 8 أحرف على الأقل.");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showMessage("authMessage", "كلمتا المرور غير متطابقتين.");
+        return;
+      }
+    }
+
+    busy = true;
+    $("submitBtn").disabled = true;
+    $("submitBtn").textContent = "لحظة واحدة...";
+
+    try {
+      if (mode === "signup") {
+        const fullName = $("fullName").value.trim();
+        const username = $("username").value.trim().toLowerCase();
+
+        const { data, error } = await db.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              display_name: fullName,
+              username: username
+            }
+          }
+        });
+
+        if (error) throw error;
+
+        if (data.session && data.user) {
+          await showApp(data.user);
+        } else {
+          setMode("login");
+          $("email").value = email;
+          showMessage("authMessage",
+            "تم إنشاء الحساب. افتح بريدك الإلكتروني واضغط رابط التأكيد، ثم ارجع وسجّل الدخول.");
+        }
+      } else {
+        const { data, error } = await db.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) throw error;
+        if (!data.user) throw new Error("لم يتم العثور على بيانات الحساب.");
+
+        await showApp(data.user);
+      }
+    } catch (error) {
+      console.error("VANTA authentication error:", error);
+      showMessage("authMessage", "تعذر إكمال العملية: " + (error.message || "خطأ غير معروف"));
+    } finally {
+      busy = false;
+      $("submitBtn").disabled = false;
+      $("submitBtn").textContent =
+        mode === "signup" ? "إنشاء الحساب" : "تسجيل الدخول";
+    }
+  });
+
+  $("homeTab").addEventListener("click", () => {
+    $("homePanel").classList.remove("hidden");
+    $("profilePanel").classList.add("hidden");
+    $("homeTab").classList.add("active");
+    $("profileTab").classList.remove("active");
+  });
+
+  $("profileTab").addEventListener("click", () => {
+    $("profilePanel").classList.remove("hidden");
+    $("homePanel").classList.add("hidden");
+    $("profileTab").classList.add("active");
+    $("homeTab").classList.remove("active");
+  });
+
+  $("logoutBtn").addEventListener("click", async () => {
+    $("logoutBtn").disabled = true;
+    $("logoutBtn").textContent = "جارٍ تسجيل الخروج...";
+
+    try {
+      const { error } = await db.auth.signOut();
+      if (error) throw error;
+      showAuth();
+    } catch (error) {
+      showMessage("accountMessage",
+        "تعذر تسجيل الخروج: " + (error.message || "خطأ غير معروف"));
+    } finally {
+      $("logoutBtn").disabled = false;
+      $("logoutBtn").textContent = "تسجيل الخروج";
+    }
+  });
+
+  async function restoreSession() {
+    try {
+      const { data, error } = await db.auth.getSession();
+      if (error) throw error;
+
+      if (data.session && data.session.user) {
+        await showApp(data.session.user);
+      }
+    } catch (error) {
+      console.error("Session restore error:", error);
+      showMessage("authMessage",
+        "تعذر استعادة الجلسة. جرّب تسجيل الدخول مرة أخرى.");
+    }
+  }
+
+  restoreSession();
+})();
+</script>
+</body>
+  </html>
+          
