@@ -7,463 +7,1858 @@
 <meta name="theme-color" content="#09090d">
 <title>VANTA — Your World</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-:root{
-  --bg:#09090d;--panel:#12121a;--border:#292735;
-  --text:#f6f2ff;--muted:#9994aa;--accent:#b9a0ff;
+:root {
+  --bg: #09090d;
+  --panel: #12121a;
+  --panel2: #181822;
+  --border: #292735;
+  --text: #f6f2ff;
+  --muted: #9894a8;
+  --accent: #a78bfa;
+  --accent2: #7c3aed;
+  --danger: #fb7185;
+  --success: #4ade80;
 }
-*{box-sizing:border-box}
-body{
-  margin:0;background:var(--bg);color:var(--text);
-  font-family:system-ui,-apple-system,sans-serif;
+
+* {
+  box-sizing: border-box;
 }
-button,input{font:inherit}
-button{cursor:pointer}
-.hidden{display:none!important}
-header{
-  padding:16px 20px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  gap:12px;position:sticky;top:0;z-index:5;
-  background:#09090df2;backdrop-filter:blur(12px);
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  min-height: 100vh;
 }
-.logo{font-size:25px;font-weight:950;letter-spacing:4px}
-.logo span{color:var(--accent)}
-main{width:min(100% - 28px,600px);margin:28px auto;min-height:65vh}
-.card{
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:22px;padding:22px;margin-bottom:16px;
+
+button, input, textarea, select {
+  font: inherit;
 }
-h1{font-size:25px;margin:12px 0}
-h2{font-size:19px;margin:8px 0}
-p{color:var(--muted);line-height:1.8;font-size:14px}
-label{display:block;margin:15px 0 7px;font-size:13px}
-input{
-  width:100%;padding:13px;border-radius:12px;
-  border:1px solid var(--border);background:#1a1923;
-  color:white;outline:none;direction:ltr;text-align:left;
+
+button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 16px;
+  color: white;
+  background: var(--accent2);
+  transition: .2s;
 }
-input:focus{border-color:var(--accent)}
-.btn{
-  width:100%;border:0;border-radius:12px;padding:13px;
-  margin-top:16px;background:var(--accent);
-  color:#171020;font-weight:800;
+
+button:hover {
+  filter: brightness(1.15);
 }
-.btn:disabled{opacity:.6;cursor:wait}
-.switch{
-  color:var(--accent);background:none;border:0;
-  padding:5px;font-weight:700;
+
+button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
 }
-.message{
-  margin-top:15px;padding:12px;border-radius:12px;
-  background:#201d2a;color:#e5dcff;
-  font-size:13px;line-height:1.8;overflow-wrap:anywhere;
+
+.secondary {
+  background: var(--panel2);
+  border: 1px solid var(--border);
 }
-.eyebrow{color:var(--accent);font-size:11px;letter-spacing:3px}
-.small{font-size:12px;color:var(--muted)}
-.profile{display:flex;align-items:center;gap:13px;margin:20px 0}
-.avatar{
-  width:55px;height:55px;flex-shrink:0;border-radius:50%;
-  background:linear-gradient(135deg,#b9a0ff,#514078);
-  color:#100d19;display:grid;place-items:center;
-  font-size:22px;font-weight:900;
+
+.danger {
+  background: #7f1d2d;
 }
-.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
-.nav button{
-  border:1px solid var(--border);background:var(--panel);
-  color:var(--text);padding:10px 16px;border-radius:12px;
+
+input, textarea, select {
+  width: 100%;
+  background: #0d0d14;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 13px;
+  outline: none;
 }
-.nav button.active{background:var(--accent);color:#171020}
-.stat{
-  border:1px solid var(--border);background:#171620;
-  border-radius:15px;padding:15px;margin-top:12px;
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--accent);
 }
-hr{border:0;border-top:1px solid var(--border);margin:20px 0}
-footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
+
+textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+label {
+  display: block;
+  color: var(--muted);
+  margin: 12px 0 6px;
+  font-size: 14px;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.small {
+  font-size: 12px;
+}
+
+.container {
+  width: min(100% - 24px, 900px);
+  margin: auto;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(9,9,13,.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+.topbar {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.logo {
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  background: linear-gradient(90deg,#c4b5fd,#818cf8,#e879f9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 18px;
+  margin: 14px 0;
+}
+
+.auth-wrap {
+  width: min(100% - 28px, 440px);
+  margin: 7vh auto 30px;
+}
+
+.auth-title {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.auth-title h1 {
+  font-size: 42px;
+  margin: 0;
+  letter-spacing: 5px;
+}
+
+.auth-title p {
+  color: var(--muted);
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.tabs button {
+  flex: 1;
+}
+
+.tabs button.active {
+  background: var(--accent2);
+}
+
+.notice {
+  padding: 12px;
+  border-radius: 12px;
+  background: #201b31;
+  color: #ddd6fe;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.notice.error {
+  background: #35151e;
+  color: #fecdd3;
+}
+
+.notice.success {
+  background: #10291d;
+  color: #bbf7d0;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 190px minmax(0,1fr);
+  gap: 18px;
+  padding-top: 18px;
+  padding-bottom: 40px;
+}
+
+.sidebar {
+  align-self: start;
+  position: sticky;
+  top: 85px;
+}
+
+.nav-button {
+  display: block;
+  width: 100%;
+  text-align: right;
+  margin-bottom: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.nav-button.active,
+.nav-button:hover {
+  background: var(--panel);
+  border-color: var(--border);
+}
+
+.page-title {
+  margin: 5px 0 18px;
+  font-size: 23px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.user-info > div:last-child {
+  min-width: 0;
+}
+
+.avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(135deg,#7c3aed,#db2777);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  font-weight: 800;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.user-card:last-child {
+  border-bottom: 0;
+}
+
+.post-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+  margin: 16px 0;
+}
+
+.post-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.actions button {
+  font-size: 13px;
+  padding: 9px 12px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.row > * {
+  min-width: 0;
+}
+
+.row input {
+  flex: 1;
+}
+
+.section {
+  display: none;
+}
+
+.section.active {
+  display: block;
+}
+
+.chat-list {
+  margin-top: 12px;
+}
+
+.chat-message {
+  max-width: 85%;
+  padding: 12px;
+  border-radius: 14px;
+  margin: 10px 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.chat-message.mine {
+  margin-right: auto;
+  background: #392568;
+}
+
+.chat-message.theirs {
+  margin-left: auto;
+  background: var(--panel2);
+  border: 1px solid var(--border);
+}
+
+.chat-time {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  color: #c4b5fd;
+}
+
+#chatMessages {
+  display: flex;
+  flex-direction: column;
+  max-height: 48vh;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 25px 10px;
+}
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  padding: 25px 10px;
+  font-size: 12px;
+}
+
+@media (max-width: 650px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 5px;
+  }
+
+  .nav-button {
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 12px;
+    margin: 0;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .user-card {
+    align-items: flex-start;
+  }
+
+  .user-card > button {
+    padding: 9px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+}
 </style>
 </head>
 
 <body>
-<header>
-  <div class="logo"><span>V</span>ANTA</div>
-  <span class="small">YOUR WORLD. YOUR SPACE.</span>
+
+<header id="appHeader" class="hidden">
+  <div class="container topbar">
+    <div class="logo">VANTA</div>
+    <button id="logoutBtn" class="secondary">تسجيل الخروج</button>
+  </div>
 </header>
 
-<main>
-  <!-- تسجيل الحساب والدخول -->
-  <section class="card" id="authScreen">
-    <div class="eyebrow">WELCOME TO VANTA</div>
-    <h1 id="formTitle">أنشئ حسابك الجديد</h1>
-    <p id="formDescription">سجّل حسابك وابدأ بناء عالمك الخاص.</p>
+<!-- تسجيل الدخول وإنشاء الحساب -->
+<div id="authScreen" class="auth-wrap">
+  <div class="auth-title">
+    <h1 class="logo">VANTA</h1>
+    <p>عالمك الخاص، على طريقتك.</p>
+  </div>
 
-    <form id="authForm">
-      <div id="registerFields">
-        <label for="fullName">الاسم الكامل</label>
-        <input id="fullName" maxlength="60" autocomplete="name"
-          placeholder="اسمك الكامل" required>
+  <div class="card">
+    <div class="tabs">
+      <button id="loginTab" class="active">تسجيل الدخول</button>
+      <button id="signupTab" class="secondary">إنشاء حساب</button>
+    </div>
 
-        <label for="username">اسم المستخدم</label>
-        <input id="username" minlength="3" maxlength="24"
-          autocomplete="username" placeholder="username"
-          pattern="[A-Za-z0-9_]+" required>
-        <p class="small">حروف إنجليزية وأرقام وشرطة سفلية فقط.</p>
-      </div>
+    <div id="authMessage" class="notice hidden"></div>
 
-      <label for="email">البريد الإلكتروني</label>
-      <input id="email" type="email" autocomplete="email"
-        placeholder="you@example.com" required>
+    <form id="loginForm">
+      <label for="loginEmail">البريد الإلكتروني</label>
+      <input id="loginEmail" type="email" autocomplete="email" required>
 
-      <label for="password">كلمة المرور</label>
-      <input id="password" type="password" minlength="8"
-        autocomplete="new-password" placeholder="8 أحرف على الأقل" required>
+      <label for="loginPassword">كلمة المرور</label>
+      <input id="loginPassword" type="password"
+        autocomplete="current-password" required>
 
-      <div id="confirmField">
-        <label for="confirmPassword">تأكيد كلمة المرور</label>
-        <input id="confirmPassword" type="password" minlength="8"
-          autocomplete="new-password" placeholder="اكتبها مرة أخرى" required>
-      </div>
-
-      <button class="btn" id="submitBtn" type="submit">إنشاء الحساب</button>
+      <button type="submit" style="width:100%;margin-top:18px">
+        دخول إلى VANTA
+      </button>
     </form>
 
-    <p id="switchText">
-      عندك حساب بالفعل؟
-      <button class="switch" id="switchMode" type="button">تسجيل الدخول</button>
-    </p>
+    <form id="signupForm" class="hidden">
+      <label for="signupName">اسمك</label>
+      <input id="signupName" maxlength="60" required>
 
-    <div id="authMessage" class="message hidden" role="status"></div>
-    <p class="small">حسابك محمي بتسجيل الدخول عبر Supabase.</p>
-  </section>
+      <label for="signupUsername">اسم المستخدم</label>
+      <input id="signupUsername" maxlength="24"
+        pattern="[A-Za-z0-9_]{3,24}"
+        title="استخدم الحروف الإنجليزية والأرقام والشرطة السفلية فقط"
+        required>
+      <p class="muted">من 3 إلى 24 حرفًا إنجليزيًا أو رقمًا أو _</p>
 
-  <!-- الواجهة الرئيسية بعد تسجيل الدخول -->
-  <section id="appScreen" class="hidden">
-    <nav class="nav">
-      <button type="button" id="homeTab" class="active">الرئيسية</button>
-      <button type="button" id="profileTab">حسابي</button>
-    </nav>
+      <label for="signupEmail">البريد الإلكتروني</label>
+      <input id="signupEmail" type="email" autocomplete="email" required>
 
-    <section id="homePanel" class="card">
-      <div class="eyebrow">YOUR WORLD. YOUR SPACE.</div>
-      <h1>أهلًا بيك في VANTA 🖤</h1>
-      <p>دي مساحتك الخاصة. حسابك اتصل بنجاح، ونقدر نكمل بناء المنصة من هنا.</p>
+      <label for="signupPassword">كلمة المرور</label>
+      <input id="signupPassword" type="password"
+        minlength="8" autocomplete="new-password" required>
 
-      <div class="profile">
-        <div class="avatar" id="homeAvatar">V</div>
-        <div>
-          <strong id="homeName">مستخدم VANTA</strong>
-          <p id="homeHandle" style="margin:5px 0"></p>
+      <button type="submit" style="width:100%;margin-top:18px">
+        إنشاء حساب
+      </button>
+    </form>
+  </div>
+
+  <footer>VANTA © 2026 — Your World</footer>
+</div>
+
+<!-- التطبيق بعد تسجيل الدخول -->
+<div id="appScreen" class="hidden">
+  <div class="container app-layout">
+
+    <aside class="sidebar card">
+      <button class="nav-button active" data-tab="home">🏠 الرئيسية</button>
+      <button class="nav-button" data-tab="search">🔎 البحث</button>
+      <button class="nav-button" data-tab="profile">👤 حسابي</button>
+      <button class="nav-button" data-tab="messages">💬 الرسائل</button>
+      <button class="nav-button" data-tab="settings">⚙️ الإعدادات</button>
+    </aside>
+
+    <main>
+      <!-- الرئيسية والمنشورات -->
+      <section id="tab-home" class="section active">
+        <h2 class="page-title">أهلًا بيك في VANTA ✨</h2>
+
+        <div class="card">
+          <h3>إيه اللي في بالك؟</h3>
+          <form id="postForm">
+            <textarea id="postContent"
+              maxlength="5000"
+              placeholder="اكتب منشورك هنا..."
+              required></textarea>
+            <div class="row" style="justify-content:space-between;margin-top:12px">
+              <span class="muted">شارك أفكارك مع مجتمعك</span>
+              <button type="submit">نشر</button>
+            </div>
+          </form>
+          <div id="postMessage" class="notice hidden"></div>
         </div>
-      </div>
 
-      <div class="stat">
-        <h2>مساحتك الخاصة</h2>
-        <p>تم تسجيل دخولك. الخطوة التالية هي ربط المنشورات وباقي خصائص المنصة بقاعدة البيانات.</p>
-      </div>
-
-      <div id="homeMessage" class="message hidden" role="status"></div>
-    </section>
-
-    <section id="profilePanel" class="card hidden">
-      <div class="eyebrow">YOUR ACCOUNT</div>
-      <h1>حسابي</h1>
-
-      <div class="profile">
-        <div class="avatar" id="profileAvatar">V</div>
-        <div>
-          <strong id="profileName">مستخدم VANTA</strong>
-          <p id="profileHandle" style="margin:5px 0"></p>
+        <div id="feedMessage" class="notice hidden"></div>
+        <div id="feed">
+          <div class="empty">جاري تحميل المنشورات...</div>
         </div>
-      </div>
+      </section>
 
-      <hr>
-      <p>البريد الإلكتروني</p>
-      <strong id="accountEmail"></strong>
-      <div id="accountMessage" class="message hidden" role="status"></div>
-      <button class="btn" id="logoutBtn" type="button">تسجيل الخروج</button>
-    </section>
-  </section>
-</main>
+      <!-- البحث عن الحسابات -->
+      <section id="tab-search" class="section">
+        <h2 class="page-title">اكتشف الناس 🔎</h2>
 
-<footer>VANTA © 2026 · YOUR WORLD. YOUR SPACE.</footer>
+        <div class="card">
+          <form id="searchForm">
+            <label for="searchTerm">اسم المستخدم أو الاسم الظاهر</label>
+            <div class="row">
+              <input id="searchTerm" maxlength="60"
+                placeholder="ابحث عن حساب..." required>
+              <button type="submit">بحث</button>
+            </div>
+          </form>
+          <div id="searchMessage" class="notice hidden"></div>
+          <div id="searchResults"></div>
+        </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <div id="userProfilePanel" class="card hidden">
+          <div id="userProfileContent"></div>
+        </div>
+      </section>
+
+      <!-- حسابي -->
+      <section id="tab-profile" class="section">
+        <h2 class="page-title">حسابي الشخصي 👤</h2>
+
+        <div class="card">
+          <div id="myProfileView"></div>
+        </div>
+
+        <div class="card">
+          <h3>تعديل بياناتك</h3>
+          <form id="profileForm">
+            <label for="editDisplayName">الاسم الظاهر</label>
+            <input id="editDisplayName" maxlength="60" required>
+
+            <label for="editBio">نبذة عنك</label>
+            <textarea id="editBio" maxlength="300"
+              placeholder="اكتب نبذة بسيطة عنك"></textarea>
+
+            <label for="editAvatar">رابط صورة الحساب</label>
+            <input id="editAvatar" type="url"
+              placeholder="https://example.com/image.jpg">
+
+            <label style="display:flex;align-items:center;gap:10px">
+              <input id="editPrivate" type="checkbox" style="width:auto">
+              جعل الحساب خاصًا
+            </label>
+
+            <button type="submit">حفظ التعديلات</button>
+          </form>
+          <div id="profileMessage" class="notice hidden"></div>
+        </div>
+
+        <div class="card">
+          <h3>منشوراتي</h3>
+          <div id="myPosts"></div>
+        </div>
+      </section>
+
+      <!-- الرسائل -->
+      <section id="tab-messages" class="section">
+        <h2 class="page-title">رسائلك 💬</h2>
+
+        <div class="card">
+          <h3>ابدأ محادثة</h3>
+          <form id="newChatForm">
+            <label for="chatUsername">اسم المستخدم</label>
+            <div class="row">
+              <input id="chatUsername" maxlength="24"
+                placeholder="username" required>
+              <button type="submit">فتح</button>
+            </div>
+          </form>
+          <div id="messagesMessage" class="notice hidden"></div>
+        </div>
+
+        <div id="conversationList" class="card">
+          <div class="empty">لا توجد محادثات ظاهرة حاليًا.</div>
+        </div>
+
+        <div id="chatPanel" class="card hidden">
+          <div id="chatHeading"></div>
+          <div id="chatMessages"></div>
+
+          <form id="sendMessageForm">
+            <div class="row">
+              <input id="messageInput" maxlength="5000"
+                placeholder="اكتب رسالتك..." required>
+              <button type="submit">إرسال</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- الإعدادات -->
+      <section id="tab-settings" class="section">
+        <h2 class="page-title">الإعدادات ⚙️</h2>
+
+        <div class="card">
+          <h3>الحساب</h3>
+          <p class="muted">تقدر تعدّل بياناتك من قسم حسابي.</p>
+          <button id="settingsLogoutBtn" class="danger">
+            تسجيل الخروج
+          </button>
+        </div>
+
+        <div class="card">
+          <h3>الخصوصية والأمان</h3>
+          <p class="muted">
+            استخدم الحظر والإبلاغ عند الحاجة.
+            إعدادات قاعدة البيانات هي المسؤولة عن حماية بيانات الحسابات.
+          </p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
 <script>
-(() => {
-  const SUPABASE_URL = "https://ryedioujorsguiyvaarc.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_N3V159LoRTG0ibYkx_j_5w_Y4cGZXbN";
+"use strict";
 
-  const $ = id => document.getElementById(id);
+// إعداد اتصال Supabase
+const SUPABASE_URL = "https://ryedioujorsguiyvaarc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_N3V159LoRTG0ibYkx_j_5w_Y4cGZXbN";
 
-  function showMessage(id, text) {
-    const el = $(id);
-    el.textContent = text;
-    el.classList.remove("hidden");
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let myProfile = null;
+let activeChatUser = null;
+let activeChatProfile = null;
+let currentTab = "home";
+let loadingFeed = false;
+
+  
+/* =========================
+   القطعة 3: الأدوات والحسابات والمنشورات
+========================= */
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function msg(id, text, type = "") {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = text;
+  el.className = "notice" + (type ? " " + type : "");
+  el.classList.remove("hidden");
+}
+
+function clearMsg(id) {
+  const el = $(id);
+  if (el) {
+    el.textContent = "";
+    el.classList.add("hidden");
+  }
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("ar-EG", {
+    dateStyle: "short",
+    timeStyle: "short"
+  });
+}
+
+function avatarHTML(profile) {
+  const name = profile?.display_name || profile?.username || "V";
+  const initial = escapeHTML(name.trim().charAt(0) || "V");
+  const url = String(profile?.avatar_url || "");
+
+  if (/^https?:\/\/\S+$/i.test(url)) {
+    return `<div class="avatar">
+      <img src="${escapeHTML(url)}" alt=""
+        loading="lazy"
+        referrerpolicy="no-referrer"
+        onerror="this.parentElement.textContent='${initial}'">
+    </div>`;
   }
 
-  function hideMessage(id) {
-    $(id).textContent = "";
-    $(id).classList.add("hidden");
+  return `<div class="avatar">${initial}</div>`;
+}
+
+function displayName(profile) {
+  return escapeHTML(
+    profile?.display_name || profile?.username || "مستخدم"
+  );
+}
+
+function setButtonLoading(button, loading, text = "جاري التنفيذ...") {
+  if (!button) return;
+  if (loading) {
+    button.dataset.originalText = button.textContent;
+    button.textContent = text;
+    button.disabled = true;
+  } else {
+    button.textContent = button.dataset.originalText || button.textContent;
+    button.disabled = false;
+  }
+}
+
+async function getMyProfile() {
+  if (!currentUser) return null;
+
+  const { data, error } = await db
+    .from("profiles")
+    .select("*")
+    .eq("id", currentUser.id)
+    .maybeSingle();
+
+  if (error) throw error;
+  myProfile = data;
+  return data;
+}
+
+async function ensureProfile() {
+  if (!currentUser) return;
+
+  const { data, error } = await db
+    .from("profiles")
+    .select("id")
+    .eq("id", currentUser.id)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  if (!data) {
+    const metadata = currentUser.user_metadata || {};
+    const emailPrefix = (currentUser.email || "user")
+      .split("@")[0]
+      .replace(/[^A-Za-z0-9_]/g, "")
+      .slice(0, 16) || "user";
+
+    const { error: insertError } = await db
+      .from("profiles")
+      .insert({
+        id: currentUser.id,
+        username: emailPrefix + "_" + currentUser.id.slice(0, 5),
+        display_name: metadata.display_name || emailPrefix,
+        bio: "",
+        avatar_url: "",
+        is_private: false
+      });
+
+    if (insertError) throw insertError;
   }
 
-  if (!window.supabase) {
-    showMessage("authMessage",
-      "تعذر تحميل مكتبة الاتصال. تأكد من الإنترنت وأعد فتح الموقع.");
-    $("submitBtn").disabled = true;
+  await getMyProfile();
+}
+
+function showAuth() {
+  $("authScreen").classList.remove("hidden");
+  $("appScreen").classList.add("hidden");
+  $("appHeader").classList.add("hidden");
+}
+
+function showApp() {
+  $("authScreen").classList.add("hidden");
+  $("appScreen").classList.remove("hidden");
+  $("appHeader").classList.remove("hidden");
+}
+
+function switchAuthMode(mode) {
+  const login = mode === "login";
+
+  $("loginForm").classList.toggle("hidden", !login);
+  $("signupForm").classList.toggle("hidden", login);
+
+  $("loginTab").classList.toggle("active", login);
+  $("signupTab").classList.toggle("active", !login);
+
+  $("loginTab").classList.toggle("secondary", !login);
+  $("signupTab").classList.toggle("secondary", login);
+
+  clearMsg("authMessage");
+}
+
+$("loginTab").addEventListener("click", () => switchAuthMode("login"));
+$("signupTab").addEventListener("click", () => switchAuthMode("signup"));
+
+$("loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearMsg("authMessage");
+
+  const button = event.submitter;
+  setButtonLoading(button, true, "جاري الدخول...");
+
+  try {
+    const email = $("loginEmail").value.trim();
+    const password = $("loginPassword").value;
+
+    const { data, error } = await db.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    currentUser = data.user;
+    await startApplication();
+  } catch (error) {
+    msg("authMessage", error.message || "تعذر تسجيل الدخول", "error");
+  } finally {
+    setButtonLoading(button, false);
+  }
+});
+
+$("signupForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearMsg("authMessage");
+
+  const button = event.submitter;
+  setButtonLoading(button, true, "جاري إنشاء الحساب...");
+
+  try {
+    const name = $("signupName").value.trim();
+    const username = $("signupUsername").value.trim();
+    const email = $("signupEmail").value.trim();
+    const password = $("signupPassword").value;
+
+    if (!/^[A-Za-z0-9_]{3,24}$/.test(username)) {
+      throw new Error("اسم المستخدم لازم يكون من 3 إلى 24 حرفًا إنجليزيًا أو رقمًا أو _");
+    }
+
+    const { data: existing, error: checkError } = await db
+      .from("profiles")
+      .select("id")
+      .ilike("username", username)
+      .limit(1);
+
+    if (checkError) throw checkError;
+    if (existing?.length) {
+      throw new Error("اسم المستخدم مستخدم بالفعل. اختار اسمًا تانيًا.");
+    }
+
+    const { data, error } = await db.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          display_name: name,
+          username
+        }
+      }
+    });
+
+    if (error) throw error;
+
+    if (data.session && data.user) {
+      currentUser = data.user;
+
+      const { error: profileError } = await db
+        .from("profiles")
+        .insert({
+          id: data.user.id,
+          username,
+          display_name: name,
+          bio: "",
+          avatar_url: "",
+          is_private: false
+        });
+
+      if (profileError) throw profileError;
+
+      await startApplication();
+    } else {
+      msg(
+        "authMessage",
+        "تم إرسال طلب إنشاء الحساب. لو تأكيد البريد الإلكتروني مطلوب، افتح بريدك وأكّد الحساب ثم سجّل الدخول.",
+        "success"
+      );
+      switchAuthMode("login");
+    }
+  } catch (error) {
+    msg("authMessage", error.message || "تعذر إنشاء الحساب", "error");
+  } finally {
+    setButtonLoading(button, false);
+  }
+});
+
+async function startApplication() {
+  try {
+    await ensureProfile();
+    showApp();
+    await refreshMyProfile();
+    await loadFeed();
+    await openTab("home");
+  } catch (error) {
+    console.error(error);
+    msg(
+      "authMessage",
+      "تم تسجيل الدخول، لكن تعذر تحميل بيانات الحساب: " +
+        (error.message || "خطأ غير معروف"),
+      "error"
+    );
+    showApp();
+  }
+}
+
+async function signOut() {
+  const { error } = await db.auth.signOut();
+  if (error) {
+    alert("تعذر تسجيل الخروج: " + error.message);
     return;
   }
 
-  const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY,
-    {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true
-      }
-    }
-  );
+  currentUser = null;
+  myProfile = null;
+  activeChatUser = null;
+  activeChatProfile = null;
+  showAuth();
+}
 
-  let mode = "signup";
-  let busy = false;
+$("logoutBtn").addEventListener("click", signOut);
+$("settingsLogoutBtn").addEventListener("click", signOut);
 
-  function setMode(nextMode) {
-    mode = nextMode;
-    const signup = mode === "signup";
+/* التنقل بين الأقسام */
 
-    $("registerFields").classList.toggle("hidden", !signup);
-    $("confirmField").classList.toggle("hidden", !signup);
-    $("fullName").required = signup;
-    $("username").required = signup;
-    $("confirmPassword").required = signup;
+async function openTab(tab) {
+  currentTab = tab;
 
-    $("password").autocomplete = signup ? "new-password" : "current-password";
-
-    $("formTitle").textContent =
-      signup ? "أنشئ حسابك الجديد" : "أهلًا بعودتك";
-
-    $("formDescription").textContent =
-      signup ? "سجّل حسابك وابدأ بناء عالمك الخاص."
-             : "سجّل الدخول للمتابعة إلى حسابك.";
-
-    $("submitBtn").textContent =
-      signup ? "إنشاء الحساب" : "تسجيل الدخول";
-
-    $("switchText").childNodes[0].textContent =
-      signup ? "عندك حساب بالفعل؟ " : "لسه معندكش حساب؟ ";
-
-    $("switchMode").textContent =
-      signup ? "تسجيل الدخول" : "إنشاء حساب";
-
-    hideMessage("authMessage");
-  }
-
-  $("switchMode").addEventListener("click", () => {
-    setMode(mode === "signup" ? "login" : "signup");
+  document.querySelectorAll(".nav-button").forEach(button => {
+    button.classList.toggle("active", button.dataset.tab === tab);
   });
 
-  function showAuth() {
-    $("appScreen").classList.add("hidden");
-    $("authScreen").classList.remove("hidden");
-    $("authForm").reset();
-    setMode("login");
+  document.querySelectorAll(".section").forEach(section => {
+    section.classList.toggle("active", section.id === "tab-" + tab);
+  });
+
+  if (tab === "home") await loadFeed();
+  if (tab === "profile") {
+    await refreshMyProfile();
+    await loadMyPosts();
   }
+  if (tab === "messages") await loadConversations();
+}
 
-  async function ensureProfile(user) {
-    const meta = user.user_metadata || {};
-    const emailName = (user.email || "vanta_user").split("@")[0];
-    const username = String(meta.username || emailName)
-      .toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 24) || "vanta_user";
+document.querySelectorAll(".nav-button").forEach(button => {
+  button.addEventListener("click", () => {
+    openTab(button.dataset.tab).catch(error => {
+      console.error(error);
+      alert("حصل خطأ: " + error.message);
+    });
+  });
+});
 
-    const profile = {
-      id: user.id,
-      username,
-      display_name: String(meta.display_name || emailName).slice(0, 60)
-    };
+/* المنشورات */
 
-    const { error } = await db
-      .from("profiles")
-      .upsert(profile, { onConflict: "id" });
+async function getBlockedIds() {
+  const { data, error } = await db
+    .from("user_blocks")
+    .select("blocked_id")
+    .eq("blocker_id", currentUser.id);
 
-    if (error) {
-      console.error("Profile save error:", error);
-      return "تم تسجيل الدخول، لكن تعذر حفظ بيانات الملف الشخصي: " + error.message;
+  if (error) throw error;
+  return (data || []).map(row => row.blocked_id);
+}
+
+async function loadFeed() {
+  if (!currentUser || loadingFeed) return;
+  loadingFeed = true;
+  clearMsg("feedMessage");
+
+  try {
+    const { data, error } = await db
+      .from("posts")
+      .select("id,user_id,content,created_at")
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+
+    const posts = data || [];
+    const blockedIds = await getBlockedIds();
+
+    const authorIds = [...new Set(posts.map(post => post.user_id))];
+
+    let profiles = [];
+    if (authorIds.length) {
+      const { data: profileData, error: profileError } = await db
+        .from("profiles")
+        .select("id,username,display_name,avatar_url,is_private")
+        .in("id", authorIds);
+
+      if (profileError) throw profileError;
+      profiles = profileData || [];
     }
 
-    return "";
-  }
+    const profileMap = Object.fromEntries(
+      profiles.map(profile => [profile.id, profile])
+    );
 
-  async function showApp(user) {
-    $("authScreen").classList.add("hidden");
-    $("appScreen").classList.remove("hidden");
-    $("homePanel").classList.remove("hidden");
-    $("profilePanel").classList.add("hidden");
-    $("homeTab").classList.add("active");
-    $("profileTab").classList.remove("active");
+    const visiblePosts = posts.filter(post =>
+      !blockedIds.includes(post.user_id) &&
+      !profileMap[post.user_id]?.is_private
+    );
 
-    const meta = user.user_metadata || {};
-    const emailName = (user.email || "vanta_user").split("@")[0];
-    const name = String(meta.display_name || emailName);
-    const username = String(meta.username || emailName);
-
-    $("homeName").textContent = name;
-    $("profileName").textContent = name;
-    $("homeHandle").textContent = "@" + username;
-    $("profileHandle").textContent = "@" + username;
-    $("homeAvatar").textContent = name.trim().charAt(0).toUpperCase() || "V";
-    $("profileAvatar").textContent = name.trim().charAt(0).toUpperCase() || "V";
-    $("accountEmail").textContent = user.email || "";
-
-    hideMessage("homeMessage");
-    hideMessage("accountMessage");
-
-    const profileError = await ensureProfile(user);
-    if (profileError) {
-      showMessage("accountMessage", profileError);
-    }
-  }
-
-  $("authForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    if (busy) return;
-
-    hideMessage("authMessage");
-
-    const email = $("email").value.trim();
-    const password = $("password").value;
-
-    if (!email || !password) {
-      showMessage("authMessage", "اكتب الإيميل وكلمة المرور.");
+    if (!visiblePosts.length) {
+      $("feed").innerHTML =
+        '<div class="card empty">مفيش منشورات ظاهرة حاليًا. كن أول واحد ينشر! ✨</div>';
       return;
     }
 
-    if (mode === "signup") {
-      const fullName = $("fullName").value.trim();
-      const username = $("username").value.trim().toLowerCase();
-      const confirmPassword = $("confirmPassword").value;
+    $("feed").innerHTML = visiblePosts.map(post => {
+      const author = profileMap[post.user_id] || {
+        display_name: "مستخدم",
+        username: "unknown"
+      };
 
-      if (!fullName) {
-        showMessage("authMessage", "اكتب اسمك الكامل.");
-        return;
-      }
+      return `
+        <article class="card">
+          <div class="post-meta">
+            <div class="user-info">
+              ${avatarHTML(author)}
+              <div>
+                <strong>${displayName(author)}</strong>
+                <div class="muted">@${escapeHTML(author.username || "")}</div>
+              </div>
+            </div>
+            <span class="muted">${escapeHTML(formatDate(post.created_at))}</span>
+          </div>
 
-      if (!/^[a-z0-9_]{3,24}$/.test(username)) {
-        showMessage("authMessage",
-          "اسم المستخدم لازم يكون من 3 إلى 24 حرفًا، باستخدام الإنجليزية والأرقام و _ فقط.");
-        return;
-      }
+          <div class="post-content">${escapeHTML(post.content)}</div>
 
-      if (password.length < 8) {
-        showMessage("authMessage", "كلمة المرور لازم تكون 8 أحرف على الأقل.");
-        return;
-      }
+          <div class="actions">
+            <button class="secondary" data-action="view-user"
+              data-id="${post.user_id}">عرض الحساب</button>
 
-      if (password !== confirmPassword) {
-        showMessage("authMessage", "كلمتا المرور غير متطابقتين.");
-        return;
-      }
-    }
-
-    busy = true;
-    $("submitBtn").disabled = true;
-    $("submitBtn").textContent = "لحظة واحدة...";
-
-    try {
-      if (mode === "signup") {
-        const fullName = $("fullName").value.trim();
-        const username = $("username").value.trim().toLowerCase();
-
-        const { data, error } = await db.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              display_name: fullName,
-              username: username
+            ${
+              post.user_id === currentUser.id
+                ? `<button class="danger" data-action="delete-post"
+                    data-id="${post.id}">حذف المنشور</button>`
+                : `<button class="secondary" data-action="report-post"
+                    data-id="${post.id}">إبلاغ</button>`
             }
-          }
-        });
+          </div>
+        </article>
+      `;
+    }).join("");
 
-        if (error) throw error;
+  } catch (error) {
+    console.error("Feed error:", error);
+    msg("feedMessage", "تعذر تحميل المنشورات: " + error.message, "error");
+  } finally {
+    loadingFeed = false;
+  }
+}
 
-        if (data.session && data.user) {
-          await showApp(data.user);
-        } else {
-          setMode("login");
-          $("email").value = email;
-          showMessage("authMessage",
-            "تم إنشاء الحساب. افتح بريدك الإلكتروني واضغط رابط التأكيد، ثم ارجع وسجّل الدخول.");
-        }
-      } else {
-        const { data, error } = await db.auth.signInWithPassword({
-          email,
-          password
-        });
+$("postForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearMsg("postMessage");
 
-        if (error) throw error;
-        if (!data.user) throw new Error("لم يتم العثور على بيانات الحساب.");
+  const content = $("postContent").value.trim();
+  if (!content) return;
 
-        await showApp(data.user);
-      }
-    } catch (error) {
-      console.error("VANTA authentication error:", error);
-      showMessage("authMessage", "تعذر إكمال العملية: " + (error.message || "خطأ غير معروف"));
-    } finally {
-      busy = false;
-      $("submitBtn").disabled = false;
-      $("submitBtn").textContent =
-        mode === "signup" ? "إنشاء الحساب" : "تسجيل الدخول";
+  const button = event.submitter;
+  setButtonLoading(button, true, "جاري النشر...");
+
+  try {
+    const { error } = await db.from("posts").insert({
+      user_id: currentUser.id,
+      content
+    });
+
+    if (error) throw error;
+
+    $("postContent").value = "";
+    msg("postMessage", "تم نشر منشورك بنجاح ✨", "success");
+    await loadFeed();
+    await loadMyPosts();
+  } catch (error) {
+    msg("postMessage", "تعذر نشر المنشور: " + error.message, "error");
+  } finally {
+    setButtonLoading(button, false);
+  }
+});
+
+async function deletePost(postId) {
+  if (!confirm("متأكد إنك عايز تحذف المنشور؟")) return;
+
+  try {
+    const { error } = await db
+      .from("posts")
+      .delete()
+      .eq("id", postId)
+      .eq("user_id", currentUser.id);
+
+    if (error) throw error;
+
+    await loadFeed();
+    await loadMyPosts();
+  } catch (error) {
+    alert("تعذر حذف المنشور: " + error.message);
+  }
+}
+
+async function loadMyPosts() {
+  if (!currentUser) return;
+
+  const container = $("myPosts");
+  container.innerHTML = '<div class="empty">جاري التحميل...</div>';
+
+  try {
+    const { data, error } = await db
+      .from("posts")
+      .select("id,user_id,content,created_at")
+      .eq("user_id", currentUser.id)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (error) throw error;
+
+    if (!data?.length) {
+      container.innerHTML = '<div class="empty">لسه منزلتش منشورات.</div>';
+      return;
     }
-  });
 
-  $("homeTab").addEventListener("click", () => {
-    $("homePanel").classList.remove("hidden");
-    $("profilePanel").classList.add("hidden");
-    $("homeTab").classList.add("active");
-    $("profileTab").classList.remove("active");
-  });
+    container.innerHTML = data.map(post => `
+      <div class="card">
+        <div class="post-content">${escapeHTML(post.content)}</div>
+        <div class="post-meta">
+          <span class="muted">${escapeHTML(formatDate(post.created_at))}</span>
+          <button class="danger" data-action="delete-post"
+            data-id="${post.id}">حذف</button>
+        </div>
+      </div>
+    `).join("");
+  } catch (error) {
+    container.innerHTML = "";
+    msg("profileMessage", "تعذر تحميل منشوراتك: " + error.message, "error");
+  }
+  }
+  
+/* =========================
+   القطعة 4: البحث والحسابات والمتابعة
+========================= */
 
-  $("profileTab").addEventListener("click", () => {
-    $("profilePanel").classList.remove("hidden");
-    $("homePanel").classList.add("hidden");
-    $("profileTab").classList.add("active");
-    $("homeTab").classList.remove("active");
-  });
+$("searchForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearMsg("searchMessage");
 
-  $("logoutBtn").addEventListener("click", async () => {
-    $("logoutBtn").disabled = true;
-    $("logoutBtn").textContent = "جارٍ تسجيل الخروج...";
-
-    try {
-      const { error } = await db.auth.signOut();
-      if (error) throw error;
-      showAuth();
-    } catch (error) {
-      showMessage("accountMessage",
-        "تعذر تسجيل الخروج: " + (error.message || "خطأ غير معروف"));
-    } finally {
-      $("logoutBtn").disabled = false;
-      $("logoutBtn").textContent = "تسجيل الخروج";
-    }
-  });
-
-  async function restoreSession() {
-    try {
-      const { data, error } = await db.auth.getSession();
-      if (error) throw error;
-
-      if (data.session && data.session.user) {
-        await showApp(data.session.user);
-      }
-    } catch (error) {
-      console.error("Session restore error:", error);
-      showMessage("authMessage",
-        "تعذر استعادة الجلسة. جرّب تسجيل الدخول مرة أخرى.");
-    }
+  const term = $("searchTerm").value.trim();
+  if (!term) {
+    msg("searchMessage", "اكتب اسم الحساب اللي بتدور عليه.");
+    return;
   }
 
-  restoreSession();
-})();
+  try {
+    const safe = term.replace(/[,%()]/g, " ").trim();
+
+    const { data, error } = await db
+      .from("profiles")
+      .select("id,username,display_name,bio,avatar_url,is_private")
+      .or(
+        "username.ilike.%" + safe + "%,display_name.ilike.%" + safe + "%"
+      )
+      .limit(25);
+
+    if (error) throw error;
+
+    const results = (data || []).filter(p => p.id !== currentUser.id);
+
+    if (!results.length) {
+      msg("searchMessage", "مفيش حسابات مطابقة. جرّب اسمًا مختلفًا.");
+      $("searchResults").innerHTML = "";
+      return;
+    }
+
+    $("searchResults").innerHTML = results.map(p => `
+      <div class="user-card">
+        <div class="user-info">
+          ${avatarHTML(p)}
+          <div>
+            <strong>${displayName(p)}</strong>
+            <div class="muted">@${escapeHTML(p.username || "")}</div>
+            <div class="muted">${escapeHTML(p.bio || "")}</div>
+          </div>
+        </div>
+        <button class="secondary" data-action="view-user" data-id="${p.id}">
+          عرض الحساب
+        </button>
+      </div>
+    `).join("");
+
+  } catch (error) {
+    console.error("Search error:", error);
+    msg("searchMessage", "حصل خطأ في البحث: " + error.message, "error");
+  }
+});
+
+/* عرض حساب مستخدم آخر */
+
+async function openUserProfile(userId) {
+  const panel = $("userProfilePanel");
+  const content = $("userProfileContent");
+
+  panel.classList.remove("hidden");
+  content.innerHTML = '<div class="empty">جاري تحميل الحساب...</div>';
+
+  try {
+    const { data: profile, error } = await db
+      .from("profiles")
+      .select("id,username,display_name,bio,avatar_url,is_private")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!profile) {
+      content.textContent = "الحساب غير موجود.";
+      return;
+    }
+
+    if (profile.id === currentUser.id) {
+      await openTab("profile");
+      panel.classList.add("hidden");
+      return;
+    }
+
+    const { data: followRow, error: followError } = await db
+      .from("follows")
+      .select("follower_id,following_id,status")
+      .eq("follower_id", currentUser.id)
+      .eq("following_id", userId)
+      .maybeSingle();
+
+    if (followError) throw followError;
+
+    const { data: blockRow, error: blockError } = await db
+      .from("user_blocks")
+      .select("blocker_id,blocked_id")
+      .eq("blocker_id", currentUser.id)
+      .eq("blocked_id", userId)
+      .maybeSingle();
+
+    if (blockError) throw blockError;
+
+    const isFollowing = !!followRow;
+    const isBlocked = !!blockRow;
+
+    let userPosts = [];
+
+    if (!profile.is_private || isFollowing) {
+      const { data: posts, error: postsError } = await db
+        .from("posts")
+        .select("id,user_id,content,created_at")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(30);
+
+      if (postsError) throw postsError;
+      userPosts = posts || [];
+    }
+
+    content.innerHTML = `
+      <div class="user-info">
+        ${avatarHTML(profile)}
+        <div>
+          <h3 style="margin:0">${displayName(profile)}</h3>
+          <div class="muted">@${escapeHTML(profile.username || "")}</div>
+        </div>
+      </div>
+
+      <p>${escapeHTML(profile.bio || "لا توجد نبذة حتى الآن.")}</p>
+
+      <div class="actions">
+        <button data-action="toggle-follow" data-id="${profile.id}">
+          ${isFollowing ? "إلغاء المتابعة" : "متابعة"}
+        </button>
+
+        <button class="secondary" data-action="start-chat"
+          data-id="${profile.id}">إرسال رسالة</button>
+
+        <button class="secondary" data-action="toggle-block"
+          data-id="${profile.id}">
+          ${isBlocked ? "إلغاء الحظر" : "حظر"}
+        </button>
+
+        <button class="danger" data-action="report-user"
+          data-id="${profile.id}">إبلاغ عن الحساب</button>
+      </div>
+
+      <h3>المنشورات</h3>
+
+      ${
+        profile.is_private && !isFollowing
+          ? '<div class="empty">هذا الحساب خاص.</div>'
+          : userPosts.length
+            ? userPosts.map(post => `
+                <div class="card">
+                  <div class="post-content">${escapeHTML(post.content)}</div>
+                  <div class="muted">${escapeHTML(formatDate(post.created_at))}</div>
+                  <div class="actions">
+                    <button class="secondary" data-action="report-post"
+                      data-id="${post.id}">إبلاغ عن المنشور</button>
+                  </div>
+                </div>
+              `).join("")
+            : '<div class="empty">لا توجد منشورات حتى الآن.</div>'
+      }
+    `;
+
+  } catch (error) {
+    console.error("Profile error:", error);
+    content.textContent = "تعذر فتح الحساب: " + error.message;
+  }
+}
+
+/* متابعة وإلغاء المتابعة */
+
+async function toggleFollow(userId) {
+  const { data: existing, error: findError } = await db
+    .from("follows")
+    .select("follower_id,following_id")
+    .eq("follower_id", currentUser.id)
+    .eq("following_id", userId)
+    .maybeSingle();
+
+  if (findError) throw findError;
+
+  if (existing) {
+    const { error } = await db
+      .from("follows")
+      .delete()
+      .eq("follower_id", currentUser.id)
+      .eq("following_id", userId);
+
+    if (error) throw error;
+  } else {
+    const { error } = await db
+      .from("follows")
+      .insert({
+        follower_id: currentUser.id,
+        following_id: userId,
+        status: "accepted"
+      });
+
+    if (error) throw error;
+  }
+
+  await openUserProfile(userId);
+}
+
+/* الحظر وإلغاء الحظر */
+
+async function toggleBlock(userId) {
+  const { data: existing, error: findError } = await db
+    .from("user_blocks")
+    .select("blocker_id,blocked_id")
+    .eq("blocker_id", currentUser.id)
+    .eq("blocked_id", userId)
+    .maybeSingle();
+
+  if (findError) throw findError;
+
+  if (existing) {
+    const { error } = await db
+      .from("user_blocks")
+      .delete()
+      .eq("blocker_id", currentUser.id)
+      .eq("blocked_id", userId);
+
+    if (error) throw error;
+  } else {
+    const { error } = await db
+      .from("user_blocks")
+      .insert({
+        blocker_id: currentUser.id,
+        blocked_id: userId
+      });
+
+    if (error) throw error;
+  }
+
+  await openUserProfile(userId);
+}
+
+/* تعديل بيانات الحساب */
+
+async function refreshMyProfile() {
+  if (!currentUser) return;
+
+  const profile = await getMyProfile();
+  if (!profile) return;
+
+  $("myProfileView").innerHTML = `
+    <div class="user-info">
+      ${avatarHTML(profile)}
+      <div>
+        <h3 style="margin:0">${displayName(profile)}</h3>
+        <div class="muted">@${escapeHTML(profile.username || "")}</div>
+      </div>
+    </div>
+    <p>${escapeHTML(profile.bio || "لسه مفيش نبذة عنك.")}</p>
+    <div class="muted">
+      ${profile.is_private ? "🔒 حساب خاص" : "🌐 حساب عام"}
+    </div>
+  `;
+
+  $("editDisplayName").value = profile.display_name || "";
+  $("editBio").value = profile.bio || "";
+  $("editAvatar").value = profile.avatar_url || "";
+  $("editPrivate").checked = !!profile.is_private;
+}
+
+$("profileForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearMsg("profileMessage");
+
+  try {
+    const display_name = $("editDisplayName").value.trim();
+    const bio = $("editBio").value.trim();
+    const avatar_url = $("editAvatar").value.trim();
+    const is_private = $("editPrivate").checked;
+
+    if (!display_name) {
+      throw new Error("اكتب الاسم الظاهر الأول.");
+    }
+
+    if (
+      avatar_url &&
+      (!/^https?:\/\//i.test(avatar_url))
+    ) {
+      throw new Error("رابط الصورة لازم يبدأ بـ https:// أو http://");
+    }
+
+    const { error } = await db
+      .from("profiles")
+      .update({
+        display_name,
+        bio,
+        avatar_url,
+        is_private
+      })
+      .eq("id", currentUser.id);
+
+    if (error) throw error;
+
+    await refreshMyProfile();
+    msg("profileMessage", "تم حفظ بيانات حسابك بنجاح.", "success");
+
+  } catch (error) {
+    msg("profileMessage", "تعذر حفظ التعديلات: " + error.message, "error");
+  }
+});
+  
+/* =========================
+   القطعة 5: الرسائل والإبلاغ وربط الأزرار وتشغيل الموقع
+========================= */
+
+/* بدء محادثة مع مستخدم */
+
+async function startChat(userId) {
+  const { data: profile, error } = await db
+    .from("profiles")
+    .select("id,username,display_name,avatar_url")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!profile) throw new Error("الحساب غير موجود.");
+  if (profile.id === currentUser.id) {
+    throw new Error("مش ممكن تبعت رسالة لنفسك.");
+  }
+
+  activeChatUser = userId;
+  activeChatProfile = profile;
+
+  await openTab("messages");
+
+  $("chatPanel").classList.remove("hidden");
+  $("chatHeading").innerHTML = `
+    <div class="user-info">
+      ${avatarHTML(profile)}
+      <div>
+        <strong>${displayName(profile)}</strong>
+        <div class="muted">@${escapeHTML(profile.username || "")}</div>
+      </div>
+    </div>
+  `;
+
+  await loadChatMessages();
+}
+
+/* البحث عن مستخدم لبدء محادثة */
+
+$("newChatForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  clearMsg("messagesMessage");
+
+  const username = $("chatUsername").value.trim().replace(/^@/, "");
+
+  if (!username) return;
+
+  try {
+    const { data, error } = await db
+      .from("profiles")
+      .select("id,username")
+      .ilike("username", username)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) throw new Error("مش لاقي حساب بالاسم ده.");
+
+    await startChat(data.id);
+  } catch (error) {
+    msg("messagesMessage", error.message, "error");
+  }
+});
+
+/* تحميل قائمة المحادثات */
+
+async function loadConversations() {
+  if (!currentUser) return;
+
+  const container = $("conversationList");
+  container.innerHTML = '<div class="empty">جاري تحميل المحادثات...</div>';
+
+  try {
+    const { data, error } = await db
+      .from("messages")
+      .select("id,sender_id,receiver_id,content,created_at")
+      .or(
+        "sender_id.eq." + currentUser.id +
+        ",receiver_id.eq." + currentUser.id
+      )
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (error) throw error;
+
+    const messages = data || [];
+    const otherIds = [...new Set(messages.map(message =>
+      message.sender_id === currentUser.id
+        ? message.receiver_id
+        : message.sender_id
+    ))];
+
+    if (!otherIds.length) {
+      container.innerHTML =
+        '<div class="empty">لسه مفيش محادثات. ابحث عن حساب وابدأ الكلام 💬</div>';
+      return;
+    }
+
+    const { data: profiles, error: profileError } = await db
+      .from("profiles")
+      .select("id,username,display_name,avatar_url")
+      .in("id", otherIds);
+
+    if (profileError) throw profileError;
+
+    const profileMap = Object.fromEntries(
+      (profiles || []).map(profile => [profile.id, profile])
+    );
+
+    const latestByUser = new Map();
+
+    for (const message of messages) {
+      const otherId = message.sender_id === currentUser.id
+        ? message.receiver_id
+        : message.sender_id;
+
+      if (!latestByUser.has(otherId)) {
+        latestByUser.set(otherId, message);
+      }
+    }
+
+    container.innerHTML = [...latestByUser.entries()].map(([userId, last]) => {
+      const profile = profileMap[userId] || {
+        id: userId,
+        username: "unknown",
+        display_name: "مستخدم"
+      };
+
+      return `
+        <div class="user-card">
+          <div class="user-info">
+            ${avatarHTML(profile)}
+            <div>
+              <strong>${displayName(profile)}</strong>
+              <div class="muted">
+                ${escapeHTML(last.content.slice(0, 65))}
+              </div>
+              <div class="muted">${escapeHTML(formatDate(last.created_at))}</div>
+            </div>
+          </div>
+          <button class="secondary" data-action="start-chat"
+            data-id="${userId}">فتح</button>
+        </div>
+      `;
+    }).join("");
+
+  } catch (error) {
+    console.error("Conversation error:", error);
+    container.innerHTML = "";
+    msg("messagesMessage", "تعذر تحميل المحادثات: " + error.message, "error");
+  }
+}
+
+/* تحميل رسائل المحادثة الحالية */
+
+async function loadChatMessages() {
+  if (!currentUser || !activeChatUser) return;
+
+  const container = $("chatMessages");
+  container.innerHTML = '<div class="empty">جاري تحميل الرسائل...</div>';
+
+  try {
+    const { data, error } = await db
+      .from("messages")
+      .select("id,sender_id,receiver_id,content,created_at,read_at")
+      .or(
+        "and(sender_id.eq." + currentUser.id +
+        ",receiver_id.eq." + activeChatUser +
+        "),and(sender_id.eq." + activeChatUser +
+        ",receiver_id.eq." + currentUser.id + ")"
+      )
+      .order("created_at", { ascending: true })
+      .limit(200);
+
+    if (error) throw error;
+
+    const messages = data || [];
+
+    if (!messages.length) {
+      container.innerHTML =
+        '<div class="empty">ابدأ أول رسالة في المحادثة 👋</div>';
+      return;
+    }
+
+    container.innerHTML = messages.map(message => {
+      const mine = message.sender_id === currentUser.id;
+
+      return `
+        <div class="chat-message ${mine ? "mine" : "theirs"}">
+          ${escapeHTML(message.content)}
+          <span class="chat-time">${escapeHTML(formatDate(message.created_at))}</span>
+        </div>
+      `;
+    }).join("");
+
+    container.scrollTop = container.scrollHeight;
+
+    const unreadIds = messages
+      .filter(message =>
+        message.receiver_id === currentUser.id &&
+        !message.read_at
+      )
+      .map(message => message.id);
+
+    if (unreadIds.length) {
+      const { error: readError } = await db
+        .from("messages")
+        .update({ read_at: new Date().toISOString() })
+        .in("id", unreadIds)
+        .eq("receiver_id", currentUser.id);
+
+      if (readError) console.warn("Read status:", readError.message);
+    }
+
+  } catch (error) {
+    console.error("Chat error:", error);
+    container.innerHTML = "";
+    msg("messagesMessage", "تعذر تحميل الرسائل: " + error.message, "error");
+  }
+}
+
+/* إرسال رسالة */
+
+$("sendMessageForm").addEventListener("submit", async event => {
+  event.preventDefault();
+
+  if (!activeChatUser) {
+    msg("messagesMessage", "افتح محادثة الأول.");
+    return;
+  }
+
+  const content = $("messageInput").value.trim();
+  if (!content) return;
+
+  const button = event.submitter;
+  setButtonLoading(button, true, "إرسال...");
+
+  try {
+    const { error } = await db
+      .from("messages")
+      .insert({
+        sender_id: currentUser.id,
+        receiver_id: activeChatUser,
+        content
+      });
+
+    if (error) throw error;
+
+    $("messageInput").value = "";
+    await loadChatMessages();
+    await loadConversations();
+
+  } catch (error) {
+    msg("messagesMessage", "تعذر إرسال الرسالة: " + error.message, "error");
+  } finally {
+    setButtonLoading(button, false);
+  }
+});
+
+/* الإبلاغ عن حساب أو منشور */
+
+async function reportItem(kind, id) {
+  const reason = prompt(
+    kind === "post"
+      ? "اكتب سبب الإبلاغ عن المنشور:"
+      : "اكتب سبب الإبلاغ عن الحساب:"
+  );
+
+  if (reason === null) return;
+
+  const cleanReason = reason.trim();
+  if (!cleanReason) {
+    alert("اكتب سبب الإبلاغ الأول.");
+    return;
+  }
+
+  try {
+    const payload = {
+      reporter_id: currentUser.id,
+      reason: cleanReason,
+      status: "pending"
+    };
+
+    if (kind === "post") {
+      payload.post_id = id;
+    } else {
+      payload.reported_user_id = id;
+    }
+
+    const { error } = await db.from("reports").insert(payload);
+
+    if (error) throw error;
+
+    alert("تم إرسال البلاغ للمراجعة. شكرًا لمساعدتك.");
+  } catch (error) {
+    console.error("Report error:", error);
+    alert("تعذر إرسال البلاغ: " + error.message);
+  }
+}
+
+/* التعامل مع أزرار الحسابات والمنشورات */
+
+document.addEventListener("click", async event => {
+  const button = event.target.closest("[data-action]");
+  if (!button || !currentUser) return;
+
+  const action = button.dataset.action;
+  const id = button.dataset.id;
+
+  if (!id) return;
+
+  if (action === "delete-post") {
+    await deletePost(id);
+    return;
+  }
+
+  setButtonLoading(button, true, "لحظة...");
+
+  try {
+    if (action === "view-user") {
+      await openUserProfile(id);
+    } else if (action === "toggle-follow") {
+      await toggleFollow(id);
+    } else if (action === "toggle-block") {
+      if (!confirm("متأكد إنك عايز تغيّر حالة الحظر؟")) return;
+      await toggleBlock(id);
+      await loadFeed();
+    } else if (action === "start-chat") {
+      await startChat(id);
+    } else if (action === "report-post") {
+      await reportItem("post", id);
+    } else if (action === "report-user") {
+      await reportItem("user", id);
+    }
+  } catch (error) {
+    console.error("Action error:", error);
+    alert("حصل خطأ: " + error.message);
+  } finally {
+    setButtonLoading(button, false);
+  }
+});
+
+/* تشغيل الجلسة عند فتح الموقع */
+
+async function initializeApp() {
+  try {
+    const { data, error } = await db.auth.getSession();
+    if (error) throw error;
+
+    const session = data.session;
+
+    if (session?.user) {
+      currentUser = session.user;
+      await startApplication();
+    } else {
+      showAuth();
+    }
+  } catch (error) {
+    console.error("Initialization error:", error);
+    showAuth();
+    msg("authMessage", "تعذر تشغيل الموقع: " + error.message, "error");
+  }
+}
+
+db.auth.onAuthStateChange((event, session) => {
+  if (event === "SIGNED_OUT") {
+    currentUser = null;
+    myProfile = null;
+    showAuth();
+  }
+});
+
+/* تشغيل الموقع */
+
+initializeApp();
+
 </script>
 </body>
-  </html>
-          
+</html>
+  
