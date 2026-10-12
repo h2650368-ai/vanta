@@ -42,8 +42,8 @@
       <div class="section-title">محادثاتك</div>
       <div id="chatList" class="chatlist"><div class="empty">محادثاتك هتظهر هنا.</div></div>
       <div class="footer">VANTA · Developed by Hussein Hisham</div>
-    </aside>
-    <main class="panel main">
+  </aside>
+     <main class="panel main">
       <div class="stories" id="stories"><button class="story" id="addStoryButton"><span class="story-ring"><span class="avatar">＋</span></span><small>ستوري جديدة</small></button></div>
       <div id="welcomePanel" class="empty"><div class="big">✦</div><h2>أهلاً بك في VANTA</h2><p>اختار محادثة من القائمة أو ابدأ محادثة جديدة.</p></div>
       <section id="chatPanel" class="hidden" style="display:flex;flex-direction:column;flex:1;min-height:0">
@@ -67,9 +67,8 @@
     </main>
   </div>
   <div class="footer">VANTA © <span id="year"></span> · حسين هشام</div>
-</div>
-
-<div id="storyModal" class="modal hidden">
+                                </div>
+  <div id="storyModal" class="modal hidden">
   <div class="modalbox">
     <div class="row" style="align-items:center"><h3 style="flex:1;margin:0">ستوري جديدة</h3><button class="iconbtn" id="closeStoryModal">×</button></div>
     <form id="storyForm">
@@ -93,7 +92,6 @@
   let currentUser = null, myProfile = null, activeChat = null, isSignup = false;
   let refreshTimer = null, recorder = null, recordingStream = null, recordChunks = [];
   let chosenStoryFile = null, currentStoryId = null;
-
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   const say = (id, text, bad=true) => { const el=$(id); if(el){el.textContent=text||"";el.style.color=bad?"#fda4af":"#86efac";} };
   const fmt = value => { try{return new Date(value).toLocaleString("ar-EG",{hour:"2-digit",minute:"2-digit",day:"numeric",month:"short"});}catch{return "";} };
@@ -116,7 +114,6 @@
     myProfile=data;
     return data;
   }
-
   async function showApp(user) {
     currentUser=user;
     setHidden("authView",true);setHidden("appView",false);
@@ -156,8 +153,7 @@
     } catch(e){statusError("authStatus",e);}
     finally{$("authSubmit").disabled=false;}
   });
-
-  $("logoutButton").addEventListener("click",async()=>{
+   $("logoutButton").addEventListener("click",async()=>{
     stopRefresh(); await db.auth.signOut(); currentUser=null;activeChat=null;
     setHidden("appView",true);setHidden("authView",false);
   });
@@ -194,4 +190,165 @@
     const {data:people,error:pe}=await db.from("profiles").select("id,username,display_name,avatar_url").in("id",ids);
     if(pe){list.innerHTML=`<div class="content muted">${esc(pe.message)}</div>`;return;}
     const map=Object.fromEntries((people||[]).map(p=>[p.id,p]));
-    list.innerHTML=[...latest.entries()].map(([id,m])=>`<button class="chatitem ${activeChat===id?"active":""}" data-chat="${esc(id)}">${avatar(map[id])}<span class="chatmeta"><strong>${esc(
+    list.innerHTML=[...latest.entries()].map(([id,m])=>`<button class="chatitem ${activeChat===id?"active":""}" data-chat="${esc(id)}">${avatar(map[id])}<span class="chatmeta"><strong>${esc(displayName(map[id]))}</strong><small>${esc(previewText(m.content))}</small></span><small>${esc(fmt(m.created_at))}</small></button>`).join("");
+    list.querySelectorAll("[data-chat]").forEach(b=>b.addEventListener("click",()=>openChat(b.dataset.chat)));
+  }
+  function previewText(raw){try{const o=JSON.parse(raw);if(o.vantaMedia)return o.type==="image"?"📷 صورة":o.type==="video"?"🎥 فيديو":"🎙️ رسالة صوتية";}catch{}return String(raw||"").slice(0,45);}
+  async function openChat(userId){
+    if(!currentUser||userId===currentUser.id)return;
+    activeChat=userId;
+    const {data:p,error}=await db.from("profiles").select("id,username,display_name,avatar_url").eq("id",userId).maybeSingle();
+    if(error||!p){alert("تعذر فتح الحساب. "+(error?.message||""));return;}
+    $("chatAvatar").innerHTML=p.avatar_url?`<img src="${esc(p.avatar_url)}" alt="">`:esc((displayName(p)[0]||"V").toUpperCase());
+    $("chatName").textContent=displayName(p);$("chatStatus").textContent="@"+(p.username||"");
+    setHidden("welcomePanel",true);setHidden("chatPanel",false);$("layout").classList.add("chat-open");
+    await loadMessages();await loadConversations();
+    stopRefresh();refreshTimer=setInterval(()=>{if(activeChat)loadMessages();},5000);
+    $("messageText").focus();
+  }
+  function stopRefresh(){if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null;}}
+  function parseMedia(raw){try{const o=JSON.parse(raw);return o?.vantaMedia?o:null;}catch{return null;}}
+  function mediaElement(item){
+    const wrap=document.createElement("div");
+    if(item.type==="image"){const img=document.createElement("img");img.src=item.url;img.alt="صورة";img.loading="lazy";wrap.append(img);}
+    else if(item.type==="video"){const v=document.createElement("video");v.src=item.url;v.controls=true;v.playsInline=true;wrap.append(v);}
+    else if(item.type==="audio"){const a=document.createElement("audio");a.src=item.url;a.controls=true;wrap.append(a);}
+    else {const a=document.createElement("a");a.href=item.url;a.target="_blank";a.rel="noopener";a.textContent=item.name||"فتح الملف";wrap.append(a);}
+    return wrap;
+  }
+  async function loadMessages(){
+    if(!activeChat||!currentUser)return;
+    const box=$("messages"),wasNearBottom=box.scrollHeight-box.scrollTop-box.clientHeight<100;
+    const other=activeChat;
+    const {data,error}=await db.from("messages").select("id,sender_id,receiver_id,content,created_at").or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${other}),and(sender_id.eq.${other},receiver_id.eq.${currentUser.id})`).order("created_at",{ascending:true}).limit(300);
+    if(error){box.innerHTML=`<div class="empty">تعذر تحميل الرسائل: ${esc(error.message)}</div>`;return;}
+    box.innerHTML="";
+    if(!data?.length){box.innerHTML=`<div class="empty"><div class="big">✉</div>ابدأ المحادثة برسالة لطيفة ✨</div>`;return;}
+    for(const m of data){
+      const b=document.createElement("div");b.className="bubble "+(m.sender_id===currentUser.id?"mine":"theirs");
+      const media=parseMedia(m.content);
+      if(media)b.append(mediaElement(media));else{const p=document.createElement("p");p.textContent=m.content||"";b.append(p);}
+      const time=document.createElement("time");time.textContent=fmt(m.created_at);b.append(time);box.append(b);
+    }
+    if(wasNearBottom)box.scrollTop=box.scrollHeight;
+  }
+  $("messageForm").addEventListener("submit",async e=>{
+    e.preventDefault();const content=$("messageText").value.trim();
+    if(!activeChat){say("chatStatusMessage","اختار محادثة الأول.");return;}if(!content)return;
+    const button=$("messageForm").querySelector('button[type="submit"]');button.disabled=true;
+    try{const {error}=await db.from("messages").insert({sender_id:currentUser.id,receiver_id:activeChat,content});if(error)throw error;$("messageText").value="";say("chatStatusMessage","",false);await loadMessages();await loadConversations();}
+    catch(e){statusError("chatStatusMessage",e);}finally{button.disabled=false;}
+  });
+  async function uploadFile(file){
+    if(!currentUser)throw new Error("سجّل الدخول أولًا.");
+    if(file.size>50*1024*1024)throw new Error("حجم الملف أكبر من 50 ميجابايت.");
+    const ok=/^(image\/(jpeg|png|webp|gif)|video\/(mp4|webm|quicktime)|audio\/(webm|mp4|mpeg|ogg|wav|aac|3gpp))$/i;
+    if(!ok.test(file.type))throw new Error("نوع الملف غير مدعوم: "+file.type);
+    const ext=(file.name.split(".").pop()||"bin").toLowerCase().replace(/[^a-z0-9]/g,"");
+    const path=`${currentUser.id}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+    const {error}=await db.storage.from(BUCKET).upload(path,file,{contentType:file.type,upsert:false});
+    if(error)throw error;
+    const {data}=db.storage.from(BUCKET).getPublicUrl(path);
+    const type=file.type.startsWith("image/")?"image":file.type.startsWith("video/")?"video":"audio";
+    return {vantaMedia:true,url:data.publicUrl,type,name:file.name||"وسائط"};
+  }
+  async function sendFile(file){
+    if(!activeChat)throw new Error("افتح محادثة الأول.");
+    const item=await uploadFile(file);
+    const {error}=await db.from("messages").insert({sender_id:currentUser.id,receiver_id:activeChat,content:JSON.stringify(item)});
+    if(error)throw error;
+    await loadMessages();await loadConversations();
+  }
+  function bindFileButton(buttonId,inputId){
+    $(buttonId).addEventListener("click",()=>$(inputId).click());
+    $(inputId).addEventListener("change",async()=>{
+      const file=$(inputId).files?.[0];if(!file)return;
+      say("chatStatusMessage","جارٍ رفع الملف...",false);
+      try{await sendFile(file);say("chatStatusMessage","تم إرسال الملف.",false);}
+      catch(e){statusError("chatStatusMessage",e);}
+      finally{$(inputId).value="";}
+    });
+  }
+  bindFileButton("galleryButton","galleryInput");bindFileButton("cameraButton","cameraInput");bindFileButton("videoButton","videoInput");
+
+  $("recordButton").addEventListener("click",async()=>{
+    if(recorder?.state==="recording"){recorder.stop();$("recordButton").textContent="🎙️ تسجيل صوت";$("recordStatus").textContent="جارٍ تجهيز التسجيل...";return;}
+    try{
+      if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)throw new Error("المتصفح لا يدعم التسجيل الصوتي.");
+      recordingStream=await navigator.mediaDevices.getUserMedia({audio:true});recordChunks=[];
+      let mime="audio/webm";
+      if(MediaRecorder.isTypeSupported("audio/webm;codecs=opus"))mime="audio/webm;codecs=opus";
+      else if(MediaRecorder.isTypeSupported("audio/mp4"))mime="audio/mp4";
+      recorder=new MediaRecorder(recordingStream,{mimeType:mime});
+      recorder.ondataavailable=e=>{if(e.data.size)recordChunks.push(e.data);};
+      recorder.onstop=async()=>{
+        try{const blob=new Blob(recordChunks,{type:recorder.mimeType||"audio/webm"});const ext=blob.type.includes("mp4")?"mp4":"webm";await sendFile(new File([blob],`voice-${Date.now()}.${ext}`,{type:blob.type}));$("recordStatus").textContent="تم إرسال التسجيل.";}
+        catch(e){$("recordStatus").textContent=e.message||"فشل التسجيل";}finally{recordingStream?.getTracks().forEach(t=>t.stop());recordingStream=null;}
+      };
+      recorder.start();$("recordButton").textContent="⏹️ إيقاف وإرسال";$("recordStatus").textContent="جارٍ التسجيل...";
+    }catch(e){$("recordStatus").textContent=e.message||"لم نستطع تشغيل الميكروفون.";}
+  });
+
+  $("addStoryButton").addEventListener("click",()=>{chosenStoryFile=null;$("storyFileName").textContent="لم يتم اختيار ملف";setHidden("storyModal",false);});
+  $("closeStoryModal").addEventListener("click",()=>setHidden("storyModal",true));
+  $("storyGalleryButton").addEventListener("click",()=>$("storyGalleryInput").click());
+  $("storyCameraButton").addEventListener("click",()=>$("storyCameraInput").click());
+  for(const id of ["storyGalleryInput","storyCameraInput"]){$(id).addEventListener("change",()=>{chosenStoryFile=$(id).files?.[0]||null;$("storyFileName").textContent=chosenStoryFile?.name||"لم يتم اختيار ملف";});}
+  $("storyForm").addEventListener("submit",async e=>{
+    e.preventDefault();if(!currentUser)return;
+    const text=$("storyText").value.trim();if(!text&&!chosenStoryFile){say("storyStatus","اكتب نصًا أو اختر صورة/فيديو.");return;}
+    const button=$("storyForm").querySelector('button[type="submit"]');button.disabled=true;say("storyStatus","جارٍ نشر الستوري...",false);
+    try{
+      let uploaded=null;if(chosenStoryFile)uploaded=await uploadFile(chosenStoryFile);
+      const {error}=await db.from("stories").insert({user_id:currentUser.id,content:text||null,media_url:uploaded?.url||null,media_type:uploaded?.type||"text",expires_at:new Date(Date.now()+86400000).toISOString()});
+      if(error)throw error;
+      $("storyText").value="";$("storyGalleryInput").value="";$("storyCameraInput").value="";chosenStoryFile=null;
+      setHidden("storyModal",true);await loadStories();
+    }catch(e){statusError("storyStatus",e);}finally{button.disabled=false;}
+  });
+  $("closeViewStory").addEventListener("click",()=>setHidden("viewStoryModal",true));
+  
+  async function loadStories(){
+    const strip=$("stories");
+    const {data,error}=await db.from("stories").select("*").gt("expires_at",new Date().toISOString()).order("created_at",{ascending:false}).limit(60);
+    if(error){console.error("Stories",error);return;}
+    const ids=[...new Set((data||[]).map(s=>s.user_id))];let profiles=[];
+    if(ids.length){const r=await db.from("profiles").select("id,username,display_name,avatar_url").in("id",ids);if(r.error){console.error(r.error);return;}profiles=r.data||[];}
+    const map=Object.fromEntries(profiles.map(p=>[p.id,p]));
+    strip.innerHTML=`<button class="story" id="addStoryButton2"><span class="story-ring"><span class="avatar">＋</span></span><small>ستوري جديدة</small></button>`+(data||[]).map(s=>`<button class="story" data-story="${esc(s.id)}"><span class="story-ring">${avatar(map[s.user_id])}</span><small>${esc(displayName(map[s.user_id]))}</small></button>`).join("");
+    $("addStoryButton2").addEventListener("click",()=>$("addStoryButton").click());
+    strip.querySelectorAll("[data-story]").forEach(b=>b.addEventListener("click",()=>viewStory(b.dataset.story)));
+  }
+  async function viewStory(id){
+    try{
+      const {data:s,error}=await db.from("stories").select("*").eq("id",id).gt("expires_at",new Date().toISOString()).single();if(error)throw error;
+      const {data:p}=await db.from("profiles").select("id,username,display_name").eq("id",s.user_id).maybeSingle();
+      $("viewStoryOwner").textContent=displayName(p)+" · "+fmt(s.created_at);
+      const box=$("viewStoryContent");box.innerHTML="";
+      if(s.media_url&&s.media_type==="image"){const img=document.createElement("img");img.src=s.media_url;img.className="storymedia";box.append(img);}
+      if(s.media_url&&s.media_type==="video"){const v=document.createElement("video");v.src=s.media_url;v.controls=true;v.playsInline=true;v.className="storymedia";box.append(v);}
+      if(s.content){const ptag=document.createElement("p");ptag.textContent=s.content;box.append(ptag);}
+      if(s.user_id===currentUser.id){const del=document.createElement("button");del.className="btn danger";del.textContent="حذف الستوري";del.onclick=async()=>{if(!confirm("تحذف الستوري؟"))return;const r=await db.from("stories").delete().eq("id",s.id).eq("user_id",currentUser.id);if(r.error)alert(r.error.message);else{setHidden("viewStoryModal",true);loadStories();}};box.append(del);}
+      setHidden("viewStoryModal",false);
+    }catch(e){alert("تعذر عرض الستوري: "+(e.message||""));}
+  }
+
+  async function openProfile(){
+    try{const {data:p,error}=await db.from("profiles").select("*").eq("id",currentUser.id).single();if(error)throw error;myProfile=p;
+      $("displayName").value=p.display_name||"";$("myUsername").value=p.username||"";$("bio").value=p.bio||"";$("avatarUrl").value=p.avatar_url||"";setHidden("profileModal",false);
+    }catch(e){alert(e.message||"تعذر تحميل الملف الشخصي.");}
+  }
+  $("profileForm").addEventListener("submit",async e=>{
+    e.preventDefault();const name=$("displayName").value.trim(),bio=$("bio").value.trim(),url=$("avatarUrl").value.trim();
+    if(url){try{const u=new URL(url);if(!["http:","https:"].includes(u.protocol))throw Error();}catch{say("profileStatus","رابط الصورة غير صحيح.");return;}}
+    try{const {error}=await db.from("profiles").update({display_name:name||myProfile.username,bio,avatar_url:url||null}).eq("id",currentUser.id);if(error)throw error;await openProfile();say("profileStatus","تم الحفظ.",false);await loadConversations();}
+    catch(e){statusError("profileStatus",e);}
+  });
+
+  $("year").textContent=new Date().getFullYear();
+  db.auth.getSession().then(async({data,error})=>{if(error)console.error(error);if(data.session)await showApp(data.session.user);});
+  db.auth.onAuthStateChange((event,session)=>{if(event==="SIGNED_OUT"){stopRefresh();setHidden("appView",true);setHidden("authView",false);}else if(event==="SIGNED_IN"&&session&&!currentUser){showApp(session.user);}});
+})();
+</script>
+</body>
+</html>
